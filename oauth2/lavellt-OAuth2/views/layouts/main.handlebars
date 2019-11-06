@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+	<title>OAuth2Demo-TuckerLavell</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	
+	{{#each jsscripts}}
+    <script src="/static/{{this}}"></script>
+    {{/each}}
+	
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<!-- font awesome (icons) -->
+	<!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">	<link rel="stylesheet" href="/css/style.css"> -->
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+		<a class="navbar-brand" href="/#">OAuth2 Demo</a>
+		<ul class="nav navbar-nav">
+			<li class="nav-item"><a class="nav-link" href="/oauth2">Back to Start Page</a></li>
+		</ul>
+	</nav>
+	{{{body}}}
+	<footer>
+		<p>By: <a href="mailto:lavellt@oregonstate.edu">Tucker Lavell</a></p>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{
+    "GCLOUD_PROJECT": "lavellt-boatstatus",
+    "DATA_BACKEND": "datastore"
+}

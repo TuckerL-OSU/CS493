@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lavellt-boatstatus",
+  "private_key_id": "acb423874445fbdb77ce30d223e9a555406c8eeb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3ZMaNk4zk4jEn\nZkMzWDf5fcudS6PfbpDPIJgvrV9651uhG0r034jKK7+fJzYPcF66+pQs1VWeegZb\ngFix2hkGzBlCfxIlMCajWKIwt3C/pFU+HlSP2KWpRiSkljs9JzGidhRFq2hDgC2Q\ngF5aUB08l09DccPqBp+q78jIria0L8Ra752VfYq6hEHNwruRH/CjpvnmE92I+LvS\nRbmFDq1/FgJvOJmMDIVLZwU523PB+0+erN47OrXkNbgH8ujyElFO97zNJALId/tI\n3ePb3gyP9lvtmwofdaTVHu/2zAWvT+RBLjiqx4ST/3D32v2OJ7cp94TVe1fjYBce\nnCrgkD3VAgMBAAECggEAAPaleMq8wHRHWzq7mwvy5ohYjWZMOv+RZ2OQ8rZfwr08\nOBlbTsEHFQs4y2T0PdpSk3t+7TAruuFPCKQ6eXWFw++tKRiSZ4g17VrCwCwrVysz\n8j3l8zscpH1RWPbPFdzcWZgMNp3jAz1e2YKX74DtpMryTo6AJhaynqSTpfZAQgCr\nilZ3FY4nMRdX1oXih4CQqH78198HNAO7L1Whm3opwoLxNZszfs8G7mNO92X292YF\nE8/11Y07y+tula0NwYUNiCxQ8EIoPg9jSONVe4yogcTnUIJaiw2f8eN6hbyinxKO\nEO+XWxqKneWtKCJIwbysrQaSd0zWWMJZUIXPt9D7qwKBgQD57GLn0tmlQWHnHVO6\nmd1DoRSbWqh/aleJqiaBq8yx/HTPt+X3zmtvhh/igWC8nXCmmp0bn6M7u/cOUdi6\npAFD0umH9TsSpFPLpJq+o2mii5RuTLheNBhQ8vzovtqMDMbVcBgkWFNMoay0xFe5\nxB5oHSBoQXVotnCG3S7WfukHMwKBgQC72ki7/aY9n7KnOXNaDR/oX43g/d8BvZKM\ncpzFQ2HtU9wSHPTe2ioW3/D+W0p8bjyIRrqXLSBAkVwakw2XYvQXNKPfNO3+VHLk\ntgTb2IINpj4tHfjdSP/w1Yy3uQ2JnX825nUcDwRgEaGVmpxnPXwG7UdRUM4PTIoX\nFH+EGJAG1wKBgQCWB4/ANtUs3TkWcoaG6ELpjFNAh4XLJ11xaNFA2o9A8Zp176F/\nx0y7YDrX0G7wC1tKyFoz8PseqtG+qOd/82BHBN/oHBDgOgGLqD603ohVaZErPacX\n9hH61kN4vMmZdToPewEjIFqxEAULZyp6e/785S9FJraCq7KVY0XwwbLF/QKBgHK/\nv0hehAsGn1n5BRaQB9qpbABw86WbiIaUiGETbSFM5ZSG7amnuKgqeYrWdySVLhLM\nqbQpE5d9c7aj91xvTM1UEXoKWgrOyTQeX89vbNorn7VtppR9wCH8QK4Fs1hJxeji\nU80k+zY37u10+W8zJq0Qik0IwCamSYAZvF8Tpf8XAoGAFtfKr0nngYawcPF9D6ml\ny/uUel6EZqy+RDTQhL6CoQdKy6atnbTLqrwoR0oD6N6Ec9Gfocy3zzEfkLOwwP6H\nX6Y/tqmKDVlE1wDq3MCGAYSAxQB3smsZpZgyRuNGA+/GoVxYPbP82vbBIV4Xh/6x\npFEa6Z1Lnopw20BiLa2ddKA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "lavellt-boatstatus-docker@lavellt-boatstatus.iam.gserviceaccount.com",
+  "client_id": "118257148712239628042",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lavellt-boatstatus-docker%40lavellt-boatstatus.iam.gserviceaccount.com"
+}

@@ -1,0 +1,4582 @@
+{
+	"info": {
+		"_postman_id": "f0e53b4b-e4bf-4427-a9f8-6dc54558f27c",
+		"name": "finalproject",
+		"description": "Tucker Lavells's Final Project tests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "[Auth0]Create User1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b3988ef-67ba-4506-9b57-001682753318",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"username1\", body.name);",
+							"postman.setGlobalVariable(\"user_id1\", body.user_id);",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Created Account\"] = body.created_at && body.email === \"tuckerlavell@interglow.net\";",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{auth0token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"tuckerlavell@interglow.net\",\n\t\"password\": \"{{password}}\",\n\t\"connection\": \"Username-Password-Authentication\",\n\t\"verify_email\": false\n}"
+				},
+				"url": {
+					"raw": "{{auth0url}}/users",
+					"host": [
+						"{{auth0url}}"
+					],
+					"path": [
+						"users"
+					]
+				},
+				"description": "Create user1 using Auth0."
+			},
+			"response": []
+		},
+		{
+			"name": "Login as Owner1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e2f0bf9a-1e34-47b9-8da9-a17385c35145",
+						"exec": [
+							"var resContent = postman.getResponseHeader(\"Content-Type\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"auth1\", \"Bearer \" + body.id_token);",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Asked for JSON\"] = resContent.has(\"application/json\");",
+							"",
+							"tests[\"Response has Expected Data\"] = body.access_token && body.id_token && body.scope == \"openid profile email address phone\" && body.expires_in && body.token_type == \"Bearer\";",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{username1}}\",\n\t\"password\": \"{{password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				},
+				"description": "Login to Auth0 as owner1 using user1."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID1\", body.id);",
+							"postman.setGlobalVariable(\"owner1\", user.slice(6,22));",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"new truck\",\n    \"type\": \"small\",\n    \"length\": 100\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"new truck\" && truck.type === \"small\" && truck.length === 100 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1 was created correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Edit Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f91af940-f683-46f3-a500-7018218309e2",
+						"exec": [
+							"tests[\"Response Status 303\"] = responseCode.code === 303;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"editted truck\",\n    \"type\": \"editted\",\n    \"length\": 300\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Edit Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Editted Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"console.log(\"savedTruck1: \" + savedTruck1);",
+							"console.log(\"truck.id: \" + truck.id);",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1 was editted correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck2 w/ Invalid Creds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"tests[\"Response Status 401\"] = responseCode.code === 401;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer thisisinvalid"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"happy truck\",\n    \"type\": \"smiley\",\n    \"length\": 100000\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Attempt to create truck2 using invalid credentials."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID2\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"happy truck\",\n    \"type\": \"smiley\",\n    \"length\": 100000\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck2."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID3\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"strong truck\",\n    \"type\": \"liftbro\",\n    \"length\": 20\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck3."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID4\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ninja truck\",\n    \"type\": \"stealthy\",\n    \"length\": 17\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck4."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID5\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"space truck\",\n    \"type\": \"spacious\",\n    \"length\": -100000000\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck5."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID6\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"stranger truck\",\n    \"type\": \"upside down\",\n    \"length\": -10\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck6."
+			},
+			"response": []
+		},
+		{
+			"name": "[Auth0]Create User2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ce2afb9f-9a74-4d3e-bd59-d09c65bae46a",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"username2\", body.name);",
+							"postman.setGlobalVariable(\"user_id2\", body.user_id);",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Created Account\"] = body.created_at && body.email === \"lavellt@oregonstate.edu\";",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth0token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"lavellt@oregonstate.edu\",\n\t\"password\": \"{{password}}\",\n\t\"connection\": \"Username-Password-Authentication\",\n\t\"verify_email\": false\n}"
+				},
+				"url": {
+					"raw": "{{auth0url}}/users",
+					"host": [
+						"{{auth0url}}"
+					],
+					"path": [
+						"users"
+					]
+				},
+				"description": "Create user2 using Auth0."
+			},
+			"response": []
+		},
+		{
+			"name": "Login as Owner2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e2f0bf9a-1e34-47b9-8da9-a17385c35145",
+						"exec": [
+							"var resContent = postman.getResponseHeader(\"Content-Type\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"auth2\", \"Bearer \" + body.id_token);",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Asked for JSON\"] = resContent.has(\"application/json\");",
+							"",
+							"tests[\"Response has Expected Data\"] = body.access_token && body.id_token && body.scope == \"openid profile email address phone\" && body.expires_in && body.token_type == \"Bearer\";",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{username2}}\",\n\t\"password\": \"{{password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				},
+				"description": "Login as owner2 using user2."
+			},
+			"response": []
+		},
+		{
+			"name": "User2 Edits User1 Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f91af940-f683-46f3-a500-7018218309e2",
+						"exec": [
+							"tests[\"Response Status 403\"] = responseCode.code === 403;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"bad editted truck\",\n    \"type\": \"bad edit\",\n    \"length\": 300\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Attempt to edit User1 Truck1 as User2."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnEditted Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"console.log(\"savedTruck1: \" + savedTruck1);",
+							"console.log(\"truck.id: \" + truck.id);",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1 was not editted."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Truck7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d96d4637-3724-417c-847c-268fb62c1505",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"//setTimeout(function(){}, 50);",
+							"//var user = postman.getResponseCookie(\"owner\").value;",
+							"var user = postman.getResponseHeader(\"Set-Cookie\");",
+							"",
+							"postman.setGlobalVariable(\"truckID7\", body.id);",
+							"postman.setGlobalVariable(\"owner2\", user.slice(6,22));",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /trucks/ + body.id;",
+							"",
+							"tests[\"Owner Cookie set\"] = typeof(user) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"DJ Khaled\",\n    \"type\": \"Another\",\n    \"length\": 9001\n}"
+				},
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Create truck7."
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Trucks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "871f44b0-052e-410b-bb57-f22e65b7826f",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedTruck3 = postman.getGlobalVariable('truckID3');",
+							"var savedTruck4 = postman.getGlobalVariable('truckID4');",
+							"var savedTruck5 = postman.getGlobalVariable('truckID5');",
+							"var savedTruck6 = postman.getGlobalVariable('truckID6');",
+							"var savedTruck7 = postman.getGlobalVariable('truckID7');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var owner2 = postman.getGlobalVariable('username2');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"allTrucksNext1\", body.next);",
+							"",
+							"var trucksAreGood = 0;",
+							"",
+							"for (var trucks in body.trucks) {",
+							"    var truck = {};",
+							"    truck = body.trucks[trucks];",
+							"    ",
+							"    if (truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck2 && truck.name === \"happy truck\" && truck.type === \"smiley\" && truck.length === 100000 && truck.self === host + \"/trucks/\" + savedTruck2 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck3 && truck.name === \"strong truck\" && truck.type === \"liftbro\" && truck.length === 20 && truck.self === host + \"/trucks/\" + savedTruck3 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck4 && truck.name === \"ninja truck\" && truck.type === \"stealthy\" && truck.length === 17 && truck.self === host + \"/trucks/\" + savedTruck4 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck5 && truck.name === \"space truck\" && truck.type === \"spacious\" && truck.length === -100000000 && truck.self === host + \"/trucks/\" + savedTruck5 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck6 && truck.name === \"stranger truck\" && truck.type === \"upside down\" && truck.length === -10 && truck.self === host + \"/trucks/\" + savedTruck6 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck7 && truck.name === \"DJ Khaled\" && truck.type === \"Another\" && truck.length === 9001 && truck.self === host + \"/trucks/\" + savedTruck7 && truck.owner === owner2) {",
+							"        trucksAreGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Trucks are Correct\"] =  trucksAreGood === 5;",
+							"",
+							"tests[\"Trucks are paginated with 5 per page\"] = body.trucks.length === 5 && typeof(body.next) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks"
+					]
+				},
+				"description": "Get all trucks."
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Trucks Pg2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "871f44b0-052e-410b-bb57-f22e65b7826f",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedTruck3 = postman.getGlobalVariable('truckID3');",
+							"var savedTruck4 = postman.getGlobalVariable('truckID4');",
+							"var savedTruck5 = postman.getGlobalVariable('truckID5');",
+							"var savedTruck6 = postman.getGlobalVariable('truckID6');",
+							"var savedTruck7 = postman.getGlobalVariable('truckID7');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var owner2 = postman.getGlobalVariable('username2');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"allTrucksNext1\", body.next);",
+							"",
+							"var trucksAreGood = 0;",
+							"",
+							"for (var trucks in body.trucks) {",
+							"    var truck = {};",
+							"    truck = body.trucks[trucks];",
+							"    ",
+							"    if (truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck2 && truck.name === \"happy truck\" && truck.type === \"smiley\" && truck.length === 100000 && truck.self === host + \"/trucks/\" + savedTruck2 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck3 && truck.name === \"strong truck\" && truck.type === \"liftbro\" && truck.length === 20 && truck.self === host + \"/trucks/\" + savedTruck3 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck4 && truck.name === \"ninja truck\" && truck.type === \"stealthy\" && truck.length === 17 && truck.self === host + \"/trucks/\" + savedTruck4 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck5 && truck.name === \"space truck\" && truck.type === \"spacious\" && truck.length === -100000000 && truck.self === host + \"/trucks/\" + savedTruck5 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck6 && truck.name === \"stranger truck\" && truck.type === \"upside down\" && truck.length === -10 && truck.self === host + \"/trucks/\" + savedTruck6 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck7 && truck.name === \"DJ Khaled\" && truck.type === \"Another\" && truck.length === 9001 && truck.self === host + \"/trucks/\" + savedTruck7 && truck.owner === owner2) {",
+							"        trucksAreGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Trucks are Correct\"] =  trucksAreGood === 2;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{allTrucksNext1}}",
+					"host": [
+						"{{allTrucksNext1}}"
+					]
+				},
+				"description": "Get pg2 of all trucks."
+			},
+			"response": []
+		},
+		{
+			"name": "User2 Gets User1s Trucks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "631a8855-0e35-4c2c-b22e-a6fbaa065bb2",
+						"exec": [
+							"tests[\"Response Status 403\"] = responseCode.code === 403;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/users/{{owner1}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"{{owner1}}",
+						"trucks"
+					]
+				},
+				"description": "Attempt to get user1s trucks with user2 credentials."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID1\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 500,\n\t\"content\": \"Megablocks\",\n\t\"delivery_date\": \"05/05/2019\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet1 is Correct\"] = pallet.id === savedPallet1 && pallet.content === \"Megablocks\" && pallet.weight === 500 && pallet.delivery_date === \"05/05/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 was created correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Edit Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f91af940-f683-46f3-a500-7018218309e2",
+						"exec": [
+							"tests[\"Response Status 303\"] = responseCode.code === 303;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"weight\": 1000,\n    \"content\": \"LEGOs\",\n    \"delivery_date\": \"05/04/2019\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Edit Pallet1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Editted Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet1 is Correct\"] = pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 was editted correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID2\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 1000,\n\t\"content\": \"feathers\",\n\t\"delivery_date\": \"whenever\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet2."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID3\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 1000,\n\t\"content\": \"Gold\",\n\t\"delivery_date\": \"sometime\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet3."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID4\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 1000,\n\t\"content\": \"Money\",\n\t\"delivery_date\": \"next year\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet4."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID5\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 800,\n\t\"content\": \"People\",\n\t\"delivery_date\": \"never\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet5."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID6\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 10,\n\t\"content\": \"Pudding\",\n\t\"delivery_date\": \"soon\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet6."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID7\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 100,\n\t\"content\": \"Apples\",\n\t\"delivery_date\": \"06/06/2019\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet7."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet8",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID8\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 200,\n\t\"content\": \"Pokemon\",\n\t\"delivery_date\": \"01/01/1998\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet8."
+			},
+			"response": []
+		},
+		{
+			"name": "Create Pallet9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "811b67dc-01b7-4f71-a43b-322aab38e11c",
+						"exec": [
+							"var loc = postman.getResponseHeader(\"Location\");",
+							"var body = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"palletID9\", body.id);",
+							"url = postman.getEnvironmentVariable(\"url\");",
+							"",
+							"tests[\"Response Status 201\"] = responseCode.code === 201;",
+							"",
+							"tests[\"Location Header set\"] = loc === url + /pallets/ + body.id;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"weight\": 0,\n\t\"content\": \"Disco\",\n\t\"delivery_date\": \"1970s\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Create pallet9."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet1 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Put Pallet1 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Loaded Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"console.log(\"savedTruck1: \" + savedTruck1);",
+							"console.log(\"truck.id: \" + truck.id);",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check pallet1 was added to truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Loaded Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet1 is Correct\"] = pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1 && pallet.handler === savedTruck1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 handler was set to truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "User2 Removes Pallet1 from Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2ad93d14-d1bb-478b-84b0-6f799522facc",
+						"exec": [
+							"tests[\"Response Status 403\"] = responseCode.code === 403;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Attempt to use user2 to remove pallet1 from truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Pallet1 from Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7a171044-dcde-41cd-804d-782ba77b9616",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Remove pallet1 from truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"console.log(\"savedTruck1: \" + savedTruck1);",
+							"console.log(\"truck.id: \" + truck.id);",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && typeof(truck.pallets) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check pallet1 was removed from truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet1 is Correct\"] = pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 handler was removed."
+			},
+			"response": []
+		},
+		{
+			"name": "User2 Puts Pallet1 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 403\"] = responseCode.code === 403;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "User2 attempts to Put Pallet1 on User1s Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Unchanged Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"console.log(\"savedTruck1: \" + savedTruck1);",
+							"console.log(\"truck.id: \" + truck.id);",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && typeof(truck.pallets) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check pallet1 was not added to truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Unchanged Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet1 is Correct\"] = pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 handler was not changed to truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet1 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Put Pallet1 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet2 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID2}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID2}}"
+					]
+				},
+				"description": "Put Pallet2 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet3 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID3}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID3}}"
+					]
+				},
+				"description": "Put Pallet3 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet4 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID4}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID4}}"
+					]
+				},
+				"description": "Put Pallet4 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet5 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID5}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID5}}"
+					]
+				},
+				"description": "Put Pallet5 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet6 on Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets/{{palletID6}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets",
+						"{{palletID6}}"
+					]
+				},
+				"description": "Put Pallet6 on Truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 6;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1 Pallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61998e8f-5bd8-4446-b380-7b800b1d1279",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"getTruck1Pallets1\", body.next);",
+							"",
+							"",
+							"var palletIsGood = 0;",
+							"",
+							"for (var pallet in body.pallets) {",
+							"    //var pallet = {};",
+							"    pallet = body.pallets[pallet];",
+							"    ",
+							"    if (pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet2 && pallet.weight === 1000 && pallet.content === \"feathers\" && pallet.delivery_date === \"whenever\" && pallet.self === host + \"/pallets/\" + savedPallet2) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet3 && pallet.weight === 1000 && pallet.content === \"Gold\" && pallet.delivery_date === \"sometime\" && pallet.self === host + \"/pallets/\" + savedPallet3) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet4 && pallet.weight === 1000 && pallet.content === \"Money\" && pallet.delivery_date === \"next year\" && pallet.self === host + \"/pallets/\" + savedPallet4) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet5 && pallet.weight === 800 && pallet.content === \"People\" && pallet.delivery_date === \"never\" && pallet.self === host + \"/pallets/\" + savedPallet5) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet6 && pallet.weight === 10 && pallet.content === \"Pudding\" && pallet.delivery_date === \"soon\" && pallet.self === host + \"/pallets/\" + savedPallet6) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallets are Correct\"] =  palletIsGood === 5;",
+							"",
+							"tests[\"Trucks Pallets are paginated with 5 per page\"] = body.pallets.length === 5 && typeof(body.next) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}",
+						"pallets"
+					]
+				},
+				"description": "Get user1s truck1 pallets."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1 Pallets Pg2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61998e8f-5bd8-4446-b380-7b800b1d1279",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"getTruck1Pallets1\", body.next);",
+							"",
+							"",
+							"var palletIsGood = 0;",
+							"",
+							"for (var pallet in body.pallets) {",
+							"    //var pallet = {};",
+							"    pallet = body.pallets[pallet];",
+							"    ",
+							"    if (pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet2 && pallet.weight === 1000 && pallet.content === \"feathers\" && pallet.delivery_date === \"whenever\" && pallet.self === host + \"/pallets/\" + savedPallet2) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet3 && pallet.weight === 1000 && pallet.content === \"Gold\" && pallet.delivery_date === \"sometime\" && pallet.self === host + \"/pallets/\" + savedPallet3) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet4 && pallet.weight === 1000 && pallet.content === \"Money\" && pallet.delivery_date === \"next year\" && pallet.self === host + \"/pallets/\" + savedPallet4) {",
+							"        // && pallet.carrier.id === savedTruck1 && pallet.carrier.self === host + \"/trucks/\" + savedTruck1",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet5 && pallet.weight === 800 && pallet.content === \"People\" && pallet.delivery_date === \"never\" && pallet.self === host + \"/pallets/\" + savedPallet5) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet6 && pallet.weight === 10 && pallet.content === \"Pudding\" && pallet.delivery_date === \"soon\" && pallet.self === host + \"/pallets/\" + savedPallet6) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallets are Correct\"] =  palletIsGood === 1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{getTruck1Pallets1}}",
+					"host": [
+						"{{getTruck1Pallets1}}"
+					]
+				},
+				"description": "Get user1s truck1 pallets page 2."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet7 on Truck2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID2}}/pallets/{{palletID7}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID2}}",
+						"pallets",
+						"{{palletID7}}"
+					]
+				},
+				"description": "Put Pallet7 on Truck2."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet8 on Truck2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID2}}/pallets/{{palletID8}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID2}}",
+						"pallets",
+						"{{palletID8}}"
+					]
+				},
+				"description": "Put Pallet8 on Truck2."
+			},
+			"response": []
+		},
+		{
+			"name": "Put Pallet9 on Truck7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "116cca06-8f67-4259-8027-09537efe0f9d",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID7}}/pallets/{{palletID9}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID7}}",
+						"pallets",
+						"{{palletID9}}"
+					]
+				},
+				"description": "Put Pallet9 on Truck7."
+			},
+			"response": []
+		},
+		{
+			"name": "Get User1s Trucks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61998e8f-5bd8-4446-b380-7b800b1d1279",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedTruck3 = postman.getGlobalVariable('truckID3');",
+							"var savedTruck4 = postman.getGlobalVariable('truckID4');",
+							"var savedTruck5 = postman.getGlobalVariable('truckID5');",
+							"var savedTruck6 = postman.getGlobalVariable('truckID6');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var savedPallet7 = postman.getGlobalVariable('palletID7');",
+							"var savedPallet8 = postman.getGlobalVariable('palletID8');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"user1Next1\", body.next);",
+							"",
+							"var trucksAreGood = 0;",
+							"var truckPalletsGood = 0;",
+							"",
+							"for (var trucks in body.trucks) {",
+							"    var truck = {};",
+							"    truck = body.trucks[trucks];",
+							"    ",
+							"    if (truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 6) {",
+							"        var palletIsGood = 0;",
+							"        for (var pallets in truck.pallets) {",
+							"            var pallet = {};",
+							"            pallet = truck.pallets[pallets];",
+							"            ",
+							"            if (pallet === savedPallet1) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet2) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet3) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet4) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet5) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet6) {",
+							"                palletIsGood++;",
+							"            }",
+							"        }",
+							"        ",
+							"        if (palletIsGood === 6) {",
+							"            truckPalletsGood++;",
+							"        }",
+							"        ",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck2 && truck.name === \"happy truck\" && truck.type === \"smiley\" && truck.length === 100000 && truck.self === host + \"/trucks/\" + savedTruck2 && truck.owner === owner1 && truck.pallets.length === 2) {",
+							"        var palletIsGood = 0;",
+							"        for (var pallets in truck.pallets) {",
+							"            var pallet = {};",
+							"            pallet = truck.pallets[pallets];",
+							"            ",
+							"            if (pallet === savedPallet7) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet8) {",
+							"                palletIsGood++;",
+							"            }",
+							"        }",
+							"        ",
+							"        if (palletIsGood === 2) {",
+							"            truckPalletsGood++;",
+							"        }",
+							"        ",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck3 && truck.name === \"strong truck\" && truck.type === \"liftbro\" && truck.length === 20 && truck.self === host + \"/trucks/\" + savedTruck3 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck4 && truck.name === \"ninja truck\" && truck.type === \"stealthy\" && truck.length === 17 && truck.self === host + \"/trucks/\" + savedTruck4 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck5 && truck.name === \"space truck\" && truck.type === \"spacious\" && truck.length === -100000000 && truck.self === host + \"/trucks/\" + savedTruck5 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck6 && truck.name === \"stranger truck\" && truck.type === \"upside down\" && truck.length === -10 && truck.self === host + \"/trucks/\" + savedTruck6 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Trucks are Correct\"] =  trucksAreGood === 5 && truckPalletsGood === 1 || 2;",
+							"",
+							"tests[\"Trucks are paginated with 5 per page\"] = body.trucks.length === 5 && typeof(body.next) !== 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/users/{{owner1}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"{{owner1}}",
+						"trucks"
+					]
+				},
+				"description": "Get user1s trucks."
+			},
+			"response": []
+		},
+		{
+			"name": "Get User1s Trucks Pg2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61998e8f-5bd8-4446-b380-7b800b1d1279",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedTruck3 = postman.getGlobalVariable('truckID3');",
+							"var savedTruck4 = postman.getGlobalVariable('truckID4');",
+							"var savedTruck5 = postman.getGlobalVariable('truckID5');",
+							"var savedTruck6 = postman.getGlobalVariable('truckID6');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var savedPallet7 = postman.getGlobalVariable('palletID7');",
+							"var savedPallet8 = postman.getGlobalVariable('palletID8');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"var trucksAreGood = 0;",
+							"var truckPalletsGood = 0;",
+							"",
+							"for (var trucks in body.trucks) {",
+							"    var truck = {};",
+							"    truck = body.trucks[trucks];",
+							"    ",
+							"    if (truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 6) {",
+							"        var palletIsGood = 0;",
+							"        for (var pallets in truck.pallets) {",
+							"            var pallet = {};",
+							"            pallet = truck.pallets[pallets];",
+							"            ",
+							"            if (pallet === savedPallet1) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet2) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet3) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet4) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet5) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet6) {",
+							"                palletIsGood++;",
+							"            }",
+							"        }",
+							"        ",
+							"        if (palletIsGood === 6) {",
+							"            truckPalletsGood++;",
+							"        }",
+							"        ",
+							"        trucksAreGood++;",
+							"    }",
+							"else if (truck.id === savedTruck2 && truck.name === \"happy truck\" && truck.type === \"smiley\" && truck.length === 100000 && truck.self === host + \"/trucks/\" + savedTruck2 && truck.owner === owner1 && truck.pallets.length === 2) {",
+							"        var palletIsGood = 0;",
+							"        for (var pallets in truck.pallets) {",
+							"            var pallet = {};",
+							"            pallet = truck.pallets[pallets];",
+							"            ",
+							"            if (pallet === savedPallet7) {",
+							"                palletIsGood++;",
+							"            }",
+							"            if (pallet === savedPallet8) {",
+							"                palletIsGood++;",
+							"            }",
+							"        }",
+							"        ",
+							"        if (palletIsGood === 2) {",
+							"            truckPalletsGood++;",
+							"        }",
+							"        ",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck3 && truck.name === \"strong truck\" && truck.type === \"liftbro\" && truck.length === 20 && truck.self === host + \"/trucks/\" + savedTruck3 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck4 && truck.name === \"ninja truck\" && truck.type === \"stealthy\" && truck.length === 17 && truck.self === host + \"/trucks/\" + savedTruck4 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck5 && truck.name === \"space truck\" && truck.type === \"spacious\" && truck.length === -100000000 && truck.self === host + \"/trucks/\" + savedTruck5 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"    else if (truck.id === savedTruck6 && truck.name === \"stranger truck\" && truck.type === \"upside down\" && truck.length === -10 && truck.self === host + \"/trucks/\" + savedTruck6 && truck.owner === owner1) {",
+							"        trucksAreGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Trucks are Correct\"] =  trucksAreGood === 5 && truckPalletsGood === 1 || 2;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{user1Next1}}",
+					"host": [
+						"{{user1Next1}}"
+					]
+				},
+				"description": "Get the rest of user1s trucks."
+			},
+			"response": []
+		},
+		{
+			"name": "Get User2s Trucks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61998e8f-5bd8-4446-b380-7b800b1d1279",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck7 = postman.getGlobalVariable('truckID7');",
+							"var savedPallet9 = postman.getGlobalVariable('palletID9');",
+							"var owner2 = postman.getGlobalVariable('username2');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"user2Next1\", body.next);",
+							"",
+							"var trucksAreGood = 0;",
+							"var truckPalletsGood = 0;",
+							"",
+							"for (var trucks in body.trucks) {",
+							"    var truck = {};",
+							"    truck = body.trucks[trucks];",
+							"    ",
+							"    if (truck.id === savedTruck7 && truck.name === \"DJ Khaled\" && truck.type === \"Another\" && truck.length === 9001 && truck.self === host + \"/trucks/\" + savedTruck7 && truck.owner === owner2 && truck.pallets.length === 1) {",
+							"        var palletIsGood = 0;",
+							"        for (var pallets in truck.pallets) {",
+							"            var pallet = {};",
+							"            pallet = truck.pallets[pallets];",
+							"            ",
+							"            if (pallet === savedPallet9) {",
+							"                palletIsGood++;",
+							"            }",
+							"        }",
+							"        ",
+							"        if (palletIsGood === 1) {",
+							"            truckPalletsGood++;",
+							"        }",
+							"        ",
+							"        trucksAreGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Trucks are Correct\"] =  trucksAreGood === 1 && truckPalletsGood === 1;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/users/{{owner2}}/trucks",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"{{owner2}}",
+						"trucks"
+					]
+				},
+				"description": "Get user2s trucks."
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Pallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f24c2da8-9129-4bb0-b6dc-efa4c3fb3139",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var savedPallet7 = postman.getGlobalVariable('palletID7');",
+							"var savedPallet8 = postman.getGlobalVariable('palletID8');",
+							"var savedPallet9 = postman.getGlobalVariable('palletID9');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"postman.setGlobalVariable(\"palletsNext1\", body.next);",
+							"",
+							"var palletIsGood = 0;",
+							"",
+							"for (var pallet in body.pallets) {",
+							"    //var pallet = {};",
+							"    pallet = body.pallets[pallet];",
+							"    ",
+							"    if (pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet2 && pallet.weight === 1000 && pallet.content === \"feathers\" && pallet.delivery_date === \"whenever\" && pallet.self === host + \"/pallets/\" + savedPallet2 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet3 && pallet.weight === 1000 && pallet.content === \"Gold\" && pallet.delivery_date === \"sometime\" && pallet.self === host + \"/pallets/\" + savedPallet3 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet4 && pallet.weight === 1000 && pallet.content === \"Money\" && pallet.delivery_date === \"next year\" && pallet.self === host + \"/pallets/\" + savedPallet4 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet5 && pallet.weight === 800 && pallet.content === \"People\" && pallet.delivery_date === \"never\" && pallet.self === host + \"/pallets/\" + savedPallet5 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet6 && pallet.weight === 10 && pallet.content === \"Pudding\" && pallet.delivery_date === \"soon\" && pallet.self === host + \"/pallets/\" + savedPallet6 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet7 && pallet.weight === 100 && pallet.content === \"Apples\" && pallet.delivery_date === \"06/06/2019\" && pallet.self === host + \"/pallets/\" + savedPallet7) {",
+							"        // && pallet.handler.id === savedTruck2 && pallet.handler.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet8 && pallet.weight === 200 && pallet.content === \"Pokemon\" && pallet.delivery_date === \"01/01/1998\" && pallet.self === host + \"/pallets/\" + savedPallet8) {",
+							"        // && pallet.handler.id === savedTruck2 && pallet.handler.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet9 && pallet.weight === 0 && pallet.content === \"Disco\" && pallet.delivery_date === \"1970s\" && pallet.self === host + \"/pallets/\" + savedPallet9) {",
+							"        // && pallet.handler.id === savedTruck2 && pallet.handler.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallets are Correct\"] = palletIsGood === 5;",
+							"",
+							"tests[\"Pallets are paginated with 5 per page\"] = body.pallets.length === 5 && typeof(body.next) !== \"undefined\";",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets"
+					]
+				},
+				"description": "Get all Pallets."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pallets Pg2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f24c2da8-9129-4bb0-b6dc-efa4c3fb3139",
+						"exec": [
+							"var body = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var savedTruck2 = postman.getGlobalVariable('truckID2');",
+							"var savedPallet1 = postman.getGlobalVariable('palletID1');",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var savedPallet7 = postman.getGlobalVariable('palletID7');",
+							"var savedPallet8 = postman.getGlobalVariable('palletID8');",
+							"var savedPallet9 = postman.getGlobalVariable('palletID9');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"var palletIsGood = 0;",
+							"",
+							"for (var pallets in body.pallets) {",
+							"    var pallet = {};",
+							"    pallet = body.pallets[pallets];",
+							"    ",
+							"    if (pallet.id === savedPallet1 && pallet.content === \"LEGOs\" && pallet.weight === 1000 && pallet.delivery_date === \"05/04/2019\" && pallet.self === host + \"/pallets/\" + savedPallet1 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet2 && pallet.weight === 1000 && pallet.content === \"feathers\" && pallet.delivery_date === \"whenever\" && pallet.self === host + \"/pallets/\" + savedPallet2 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet3 && pallet.weight === 1000 && pallet.content === \"Gold\" && pallet.delivery_date === \"sometime\" && pallet.self === host + \"/pallets/\" + savedPallet3 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet4 && pallet.weight === 1000 && pallet.content === \"Money\" && pallet.delivery_date === \"next year\" && pallet.self === host + \"/pallets/\" + savedPallet4 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet5 && pallet.weight === 800 && pallet.content === \"People\" && pallet.delivery_date === \"never\" && pallet.self === host + \"/pallets/\" + savedPallet5 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet6 && pallet.weight === 10 && pallet.content === \"Pudding\" && pallet.delivery_date === \"soon\" && pallet.self === host + \"/pallets/\" + savedPallet6 && pallet.handler.id === savedTruck1 && pallet.handler.self === host + \"/trucks/\" + savedTruck1) {",
+							"        palletIsGood++;",
+							"    }    ",
+							"    else if (pallet.id === savedPallet7 && pallet.weight === 100 && pallet.content === \"Apples\" && pallet.delivery_date === \"06/06/2019\" && pallet.self === host + \"/pallets/\" + savedPallet7) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet8 && pallet.weight === 200 && pallet.content === \"Pokemon\" && pallet.delivery_date === \"01/01/1998\" && pallet.self === host + \"/pallets/\" + savedPallet8) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"    else if (pallet.id === savedPallet9 && pallet.weight === 0 && pallet.content === \"Disco\" && pallet.delivery_date === \"1970s\" && pallet.self === host + \"/pallets/\" + savedPallet9) {",
+							"        // && pallet.carrier.id === savedTruck2 && pallet.carrier.self === host + \"/trucks/\" + savedTruck2",
+							"        palletIsGood++;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallets are Correct\"] = palletIsGood === 4;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{palletsNext1}}",
+					"host": [
+						"{{palletsNext1}}"
+					]
+				},
+				"description": "Get page 2 of pallets."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck1 w/ Invalid Creds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "addb769a-3b35-4fd9-885e-fa8786254a78",
+						"exec": [
+							"tests[\"Response Status 401\"] = responseCode.code === 401;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer badtoken"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Attempt to Delete truck1 with invalid credentials."
+			},
+			"response": []
+		},
+		{
+			"name": "User2 Deletes User1 Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2ad93d14-d1bb-478b-84b0-6f799522facc",
+						"exec": [
+							"tests[\"Response Status 403\"] = responseCode.code === 403;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Attempt to use user2 to delete truck1 from user1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1 ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 6;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1 was not deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Delete pallet1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pallet1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"tests[\"Response Status 404\"] = responseCode.code === 404;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID1}}"
+					]
+				},
+				"description": "Check pallet1 was deleted correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var truck = JSON.parse(responseBody);",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var owner1 = postman.getGlobalVariable('username1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Truck1 is Correct\"] = truck.id === savedTruck1 && truck.name === \"editted truck\" && truck.type === \"editted\" && truck.length === 300 && truck.self === host + \"/trucks/\" + savedTruck1 && truck.owner === owner1 && truck.pallets.length === 5;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Prove Truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "12c399b2-0900-4268-8ad0-be77f69a81e0",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Delete truck1."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Truck1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"tests[\"Response Status 404\"] = responseCode.code === 404;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID1}}"
+					]
+				},
+				"description": "Check truck1 was deleted correctly."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet2 = postman.getGlobalVariable('palletID2');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet2 is Correct\"] = pallet.id === savedPallet2 && pallet.content === \"feathers\" && pallet.weight === 1000 && pallet.delivery_date === \"whenever\" && pallet.self === host + \"/pallets/\" + savedPallet2 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID2}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID2}}"
+					]
+				},
+				"description": "Check pallet2 handler was removed when truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet3 = postman.getGlobalVariable('palletID3');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet3 is Correct\"] = pallet.id === savedPallet3 && pallet.content === \"Gold\" && pallet.weight === 1000 && pallet.delivery_date === \"sometime\" && pallet.self === host + \"/pallets/\" + savedPallet3 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID3}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID3}}"
+					]
+				},
+				"description": "Check pallet3 handler was removed when truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet4 = postman.getGlobalVariable('palletID4');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet4 is Correct\"] = pallet.id === savedPallet4 && pallet.content === \"Money\" && pallet.weight === 1000 && pallet.delivery_date === \"next year\" && pallet.self === host + \"/pallets/\" + savedPallet4 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID4}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID4}}"
+					]
+				},
+				"description": "Check pallet4 handler was removed when truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet5 = postman.getGlobalVariable('palletID5');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet5 is Correct\"] = pallet.id === savedPallet5 && pallet.content === \"People\" && pallet.weight === 800 && pallet.delivery_date === \"never\" && pallet.self === host + \"/pallets/\" + savedPallet5 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID5}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID5}}"
+					]
+				},
+				"description": "Check pallet5 handler was removed when truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Get UnLoaded Pallet6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4e63c6e6-ff40-47c6-bcf4-30374ab2f04a",
+						"exec": [
+							"var pallet = JSON.parse(responseBody);",
+							"var savedPallet6 = postman.getGlobalVariable('palletID6');",
+							"var savedTruck1 = postman.getGlobalVariable('truckID1');",
+							"var host = postman.getEnvironmentVariable('url');",
+							"var content = postman.getResponseHeader(\"Content-Type\");",
+							"",
+							"tests[\"Response Status 200\"] = responseCode.code === 200;",
+							"",
+							"tests[\"Returned JSON\"] = content.has(\"application/json\");",
+							"",
+							"tests[\"Pallet6 is Correct\"] = pallet.id === savedPallet6 && pallet.content === \"Pudding\" && pallet.weight === 10 && pallet.delivery_date === \"soon\" && pallet.self === host + \"/pallets/\" + savedPallet6 && typeof(pallet.handler) === 'undefined';",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID6}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID6}}"
+					]
+				},
+				"description": "Check pallet6 handler was removed when truck1 was deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24abf4bf-c826-4331-80de-6f1d837aeced",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID2}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID2}}"
+					]
+				},
+				"description": "Delete truck2."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24abf4bf-c826-4331-80de-6f1d837aeced",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID3}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID3}}"
+					]
+				},
+				"description": "Delete truck3."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24abf4bf-c826-4331-80de-6f1d837aeced",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID4}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID4}}"
+					]
+				},
+				"description": "Delete truck4."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24abf4bf-c826-4331-80de-6f1d837aeced",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID5}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID5}}"
+					]
+				},
+				"description": "Delete truck5."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24abf4bf-c826-4331-80de-6f1d837aeced",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth1}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID6}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID6}}"
+					]
+				},
+				"description": "Delete truck6."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Truck7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9080f6f7-be15-4f36-9868-b0e285a79b7e",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/trucks/{{truckID7}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"trucks",
+						"{{truckID7}}"
+					]
+				},
+				"description": "Delete truck7."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID2}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID2}}"
+					]
+				},
+				"description": "Delete pallet2."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID3}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID3}}"
+					]
+				},
+				"description": "Delete pallet3."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID4}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID4}}"
+					]
+				},
+				"description": "Delete pallet4."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID5}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID5}}"
+					]
+				},
+				"description": "Delete pallet5."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID6}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID6}}"
+					]
+				},
+				"description": "Delete pallet6."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID7}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID7}}"
+					]
+				},
+				"description": "Delete pallet7."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet8",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID8}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID8}}"
+					]
+				},
+				"description": "Delete pallet8."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Pallet9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bddef5d-bb12-4439-8b1d-845277be69cc",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pallets/{{palletID9}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pallets",
+						"{{palletID9}}"
+					]
+				},
+				"description": "Delete pallet9."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Owner1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5998cef1-93e1-48ec-811e-3f909aa1a835",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/users/{{owner1}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"{{owner1}}"
+					]
+				},
+				"description": "Delete owner1 from datastore."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Owner2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5998cef1-93e1-48ec-811e-3f909aa1a835",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth2}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/users/{{owner2}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"users",
+						"{{owner2}}"
+					]
+				},
+				"description": "Delete owner2 from datastore."
+			},
+			"response": []
+		},
+		{
+			"name": "[Auth0]Delete User1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a5be5b68-7d66-46fe-b488-c8d4583a4633",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth0token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{auth0url}}/users/{{user_id1}}",
+					"host": [
+						"{{auth0url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id1}}"
+					]
+				},
+				"description": "Delete user1 from Auth0."
+			},
+			"response": []
+		},
+		{
+			"name": "[Auth0]Delete User2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "de0675f6-113a-4b7e-9fa4-a301224f466a",
+						"exec": [
+							"tests[\"Response Status 204\"] = responseCode.code === 204;",
+							"",
+							"setTimeout(function(){}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{auth0token}}"
+					}
+				],
+				"url": {
+					"raw": "{{auth0url}}/users/{{user_id2}}",
+					"host": [
+						"{{auth0url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id2}}"
+					]
+				},
+				"description": "Delete user2 from Auth0."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "5912cb24-adb8-4f56-ab4a-f1c534162227",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "95915ab4-01a3-4cd2-a3fa-63fee6fc015a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "lavellt-boatstatusapi",
+  "version": "1.0.0",
+  "description": "lavellt boat status api hw5",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Tucker Lavell",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/datastore": "^3.1.2",
+    "body-parser": "^1.19.0",
+    "express": "^4.16.4",
+    "json-to-html": "^0.1.2",
+    "node-json2html": "^1.2.0"
+  }
+}

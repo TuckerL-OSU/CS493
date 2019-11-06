@@ -1,0 +1,4 @@
+{
+    "GCLOUD_PROJECT": "lavellt-restful-api",
+    "DATA_BACKEND": "datastore"
+}

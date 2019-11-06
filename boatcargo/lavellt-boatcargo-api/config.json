@@ -1,0 +1,4 @@
+{
+    "GCLOUD_PROJECT": "lavellt-boatcargo-api",
+    "DATA_BACKEND": "datastore"
+}
